@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface ContentType {
   label: string;
@@ -15,12 +15,31 @@ interface ContentTypeCategory {
   types: ContentType[];
 }
 
+const getRandomElement = <T,>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
+
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}${month}${day}`;
+};
+
 const FileNameGenerator: React.FC = () => {
   const [contentType, setContentType] = useState<string>("");
   const [contentCategory, setContentCategory] = useState<string>("");
   const [contentTitle, setContentTitle] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
   const [date, setDate] = useState<string>("");
+
+  useEffect(() => {
+    setContentType(getRandomElement(AVAILABLE_CONTENT_TYPES.flatMap(group => group.types)).value);
+    setContentCategory(getRandomElement(AVAILABLE_CONTENT_CATEGORIES).value);
+    setContentTitle(getRandomElement(AVAILABLE_CONTENT_TITLES));
+    setLanguage(getRandomElement(AVAILABLE_LANGUAGES).value);
+    setDate(formatDate(new Date())); // Set current date in YYYYMMDD format
+  }, []);
 
   const handleContentTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -49,7 +68,8 @@ const FileNameGenerator: React.FC = () => {
   const handleDateChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setDate(event.target.value);
+    const selectedDate = new Date(event.target.value);
+    setDate(formatDate(selectedDate));
   };
 
   // Extract the available content types, categories, and titles from the PDF content
@@ -124,7 +144,7 @@ const FileNameGenerator: React.FC = () => {
 
       {/* Add additional UI elements or logic based on the selected values */}
       <p>
-        {contentType}_{contentCategory}_{contentTitle}_{language}_{date}
+        <span>{contentType}</span>_<span>{contentCategory}</span>_<span>{contentTitle}</span>_<span>{language}</span>_<span>{date}</span>
       </p>
     </div>
   );
