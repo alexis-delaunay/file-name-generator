@@ -1,6 +1,7 @@
 {
   "name": "file-name-generator",
   "version": "0.1.0",
+  "homepage": "https://alexis-delaunay.github.io/file-name-generator/",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
