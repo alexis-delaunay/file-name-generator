@@ -4,6 +4,25 @@
   /* background-color: green; */
   /* width: 100px; */
   display: initial;
+  cursor: pointer !important;
+}
+.copy-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+cursor: pointer !important;
+margin: 0.5rem;
+font-family: Arial, Helvetica, sans-serif, bold;
+font-weight: bold;
+background-color: #00569d;
+color:white;
+}
+
+.copy-button:hover {
+  /* background-color: rgba(128, 128, 128, 0.087); */
+  background-color: #4d89ba;
 }
 
 .select-dropdown2 {
@@ -22,6 +41,7 @@
   left: 0;
   top: 0;
   color: transparent;
+  cursor: pointer;
 }
 
 .select-dropdown {
@@ -36,6 +56,76 @@
   width: 100%;
 }
 
+.input-title, .input-title:focus-visible, .input-title:active {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+  /* margin-right: -1.8rem; */
+  text-align: center;
+  outline: none !important;
+  font-size: medium;
+}
+
 .select-dropdown::-ms-expand {
   display: none;
+}
+
+.hidden {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+}
+
+.date-picker {
+  opacity: 0;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+.container-select {
+input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
+  color: red;
+  position: relative;
+  width: 0 !important;
+}
+
+input::-webkit-calendar-picker-indicator {
+  width: 100% !important;
+  cursor: pointer;
+}}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  width: 100vw;
+  flex-direction: column;
+}
+
+.container-select:hover, .input-title:hover, .container-select:hover, .select-dropdown2:hover,
+.container-select:focus-visible, .input-title:focus-visible, .container-select:focus-visible, .select-dropdown2:focus-visible {
+  /* outline: 1px gray solid !important; */
+  background-color: #00569d5d;
+  background-color: #4d89ba;
+  color: white;
+  border-radius: 0.4rem;
+}
+
+.title {
+padding-bottom: 3rem;
+}
+
+/* * {
+  color: #fff;
+  background-color: black;
+} */
+
+* {
+  /* font-family: Courier; */
+  font-size: medium;
 }

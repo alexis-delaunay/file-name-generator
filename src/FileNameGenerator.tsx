@@ -21,23 +21,23 @@ const getRandomElement = <T,>(array: T[]): T => {
 };
 
 const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
+  const year = date.getFullYear() - 2000;
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}${month}${day}`;
+  // return `${date.split('-')}`;
 };
 
 const FileNameGenerator: React.FC = () => {
   const [contentType, setContentType] = useState<string>("");
   const [contentCategory, setContentCategory] = useState<string>("");
-  const [contentTitle, setContentTitle] = useState<string>("");
+  const [contentTitle, setContentTitle] = useState<string>("projectName");
   const [language, setLanguage] = useState<string>("");
   const [date, setDate] = useState<string>("");
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
   const languageRef = useRef<HTMLSelectElement>(null);
-  const dateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setContentType(
@@ -45,28 +45,9 @@ const FileNameGenerator: React.FC = () => {
         .value
     );
     setContentCategory(getRandomElement(AVAILABLE_CONTENT_CATEGORIES).value);
-    setContentTitle(getRandomElement(AVAILABLE_CONTENT_TITLES));
     setLanguage(getRandomElement(AVAILABLE_LANGUAGES).value);
     setDate(formatDate(new Date())); // Set current date in YYYYMMDD format
   }, []);
-
-  // useEffect(() => {
-  //   adjustSelectWidth(contentTypeRef);
-  //   adjustSelectWidth(contentCategoryRef);
-  //   adjustSelectWidth(languageRef);
-  // }, [contentType, contentCategory, language]);
-
-  // const adjustSelectWidth = (ref: React.RefObject<HTMLSelectElement | null>) => {
-  //   if (ref.current) {
-  //     const tempOption = document.createElement("option");
-  //     console.log("ref.current.selectedOptions[0].textContent;", ref.current.selectedOptions[0].textContent)
-  //     tempOption.textContent = ref.current.options[ref.current.selectedIndex].textContent;
-  //     ref.current.appendChild(tempOption);
-  //     ref.current.style.width = `${tempOption.offsetWidth + 50}px`;
-  //     console.log("ref.current.style.width", ref.current.style.width)
-  //     ref.current.removeChild(tempOption);
-  //   }
-  // };
 
   const handleContentTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -93,7 +74,7 @@ const FileNameGenerator: React.FC = () => {
     setLanguage(event.target.value);
   };
 
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = (event: any) => {
     const selectedDate = new Date(event.target.value);
     setDate(formatDate(selectedDate));
   };
@@ -103,116 +84,117 @@ const FileNameGenerator: React.FC = () => {
     navigator.clipboard.writeText(textToCopy);
   };
 
-  // Extract the available content types, categories, and titles from the PDF content
   const availableContentTypes = AVAILABLE_CONTENT_TYPES;
   const availableContentCategories = AVAILABLE_CONTENT_CATEGORIES;
-  const availableContentTitles = AVAILABLE_CONTENT_TITLES;
   const availableLanguages = AVAILABLE_LANGUAGES;
 
-  const [showDropdown, setShowDropdown] = useState(false);
+  const span: React.RefObject<any> = useRef(null);
+
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    setWidth(span?.current?.offsetWidth ?? 0);
+  }, [contentTitle]);
 
   return (
     <>
-      <span className="container-select">
-        {/* <button (onClick)={handleCopy}>erstes label</button> */}
-        <span>{contentType}</span>
-        <select
-          id="content-type-dropdown"
-          value={contentType}
-          onChange={handleContentTypeChange}
-          ref={contentTypeRef}
-          className="select-dropdown2"
-        >
-          <option className="asdf" value="">
-            Select a content type
-          </option>
-          {availableContentTypes.map((group) => (
-            <optgroup key={group.category} label={group.category}>
-              {group.types.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
+      <div className="container">
+        {/* <h1 className="title" data-element-name="StageHeadline" data-object-name="StageHeadline" data-object-counter="StageHeadlines">File Name Generator</h1> */}
+        <div>
+          <span className="container-select" title="Content Type">
+            <span>{contentType}</span>
+            <select
+              id="content-type-dropdown"
+              value={contentType}
+              onChange={handleContentTypeChange}
+              ref={contentTypeRef}
+              className="select-dropdown2"
+            >
+              {availableContentTypes.map((group) => (
+                <optgroup key={group.category} label={group.category}>
+                  {group.types.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
-            </optgroup>
-          ))}
-        </select>
-      </span>
-      _
-      <span className="container-select">
-        <span>{contentCategory}</span>
-        <select
-          id="content-category-dropdown"
-          value={contentCategory}
-          onChange={handleContentCategoryChange}
-          ref={contentCategoryRef}
-          className="select-dropdown2"
-        >
-          <option value="">Select a content category</option>
-          {availableContentCategories.map((category) => (
-            <option key={category.value} value={category.value}>
-              {category.label}
-            </option>
-          ))}
-        </select>
-      </span>
-      _
-      <span className="container-select">
-        <input
-          id="content-title-input"
-          type="text"
-          value={contentTitle}
-          onChange={handleContentTitleChange}
-        />
-      </span>
-      _
-      <span className="container-select">
-        <span>{language}</span>
-        <select
-          id="language-dropdown"
-          value={language}
-          onChange={handleLanguageChange}
-          ref={languageRef}
-          className="select-dropdown2"
-        >
-          <option value="">Select a language</option>
-          {availableLanguages.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {language === lang.value &&
-              document.activeElement !== languageRef.current
-                ? lang.value
-                : lang.label}{" "}
-            </option>
-          ))}
-        </select>
-      </span>
-      _
-      <span>
-        <input
-          id="date-input"
-          type="date"
-          value={date}
-          onChange={handleDateChange}
-          ref={dateRef}
-        />
-      </span>
-      {/* Add additional UI elements or logic based on the selected values */}
-      {/* <p>
-        <span>{contentType}</span>_<span>{contentCategory}</span>_
-        <span>{contentTitle}</span>_<span>{language}</span>_<span>{date}</span>
-      </p> */}
-      <p>
-        <button onClick={handleCopy}>Copy</button>
-      </p>
+            </select>
+          </span>
+          _
+          <span className="container-select" title="Content Category">
+            <span>{contentCategory}</span>
+            <select
+              id="content-category-dropdown"
+              value={contentCategory}
+              onChange={handleContentCategoryChange}
+              ref={contentCategoryRef}
+              className="select-dropdown2"
+            >
+              <optgroup key="CONTENT CATEGORY" label="CONTENT CATEGORY">
+                {availableContentCategories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </span>
+          _
+          <span className="hidden" ref={span}>
+            {contentTitle}
+          </span>
+          <input
+            type="text"
+            className="input-title"
+            value={contentTitle}
+            style={{ width }}
+            autoFocus
+            onChange={handleContentTitleChange}
+            title="project title"
+          />
+          _
+          <span className="container-select">
+            <span>{language}</span>
+            <select
+              id="language-dropdown"
+              value={language}
+              onChange={handleLanguageChange}
+              ref={languageRef}
+              className="select-dropdown2"
+            >
+              <optgroup key="LANGUAGES" label="LANGUAGES">
+                {availableLanguages.map((lang) => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </span>
+          _
+          <span className="container-select" title="Date">
+            <span>{date}</span>
+            <input
+              id="date-input"
+              type="date"
+              onChange={handleDateChange}
+              className="date-picker"
+            />
+          </span>
+        </div>
+        <button className="copy-button" onClick={handleCopy}>
+          📄 copy file name
+        </button>
+      </div>
     </>
   );
 };
 
 export default FileNameGenerator;
 
-// Constants to store available content types, categories, titles, and languages
 const AVAILABLE_CONTENT_TYPES: ContentTypeCategory[] = [
   {
-    category: "DRAWINGS dra (ContentType)",
+    category: "DRAWING",
     types: [
       { label: "CharacteristicCurve", value: "CCdra" },
       { label: "Grafic", value: "GRAFdra" },
@@ -223,7 +205,7 @@ const AVAILABLE_CONTENT_TYPES: ContentTypeCategory[] = [
     ],
   },
   {
-    category: "LAYOUTS lay (ContentType)",
+    category: "LAYOUT",
     types: [
       { label: "Brochure", value: "BROlay" },
       { label: "Flyer", value: "FLYlay" },
@@ -243,7 +225,7 @@ const AVAILABLE_CONTENT_TYPES: ContentTypeCategory[] = [
     ],
   },
   {
-    category: "VIDEOS video (ContentType)",
+    category: "VIDEO",
     types: [
       { label: "ExpertVideo", value: "EXPvideo" },
       { label: "QuickGuideVideo", value: "GUIDvideo" },
@@ -259,7 +241,6 @@ const AVAILABLE_CONTENT_TYPES: ContentTypeCategory[] = [
 ];
 
 const AVAILABLE_CONTENT_CATEGORIES: ContentCategory[] = [
-  { label: "ContentCategory (Marketing Themen)", value: "ContentCategory" },
   { label: "General Content", value: "gen" },
   { label: "Fairs and Events (e.g. trade fair wall)", value: "event" },
   { label: "Campaigning (e.g. special sizes for ads)", value: "camp" },
@@ -269,8 +250,6 @@ const AVAILABLE_CONTENT_CATEGORIES: ContentCategory[] = [
   { label: "Communication", value: "com" },
   { label: "Management", value: "manag" },
 ];
-
-const AVAILABLE_CONTENT_TITLES: string[] = ["ISH2025"];
 
 const AVAILABLE_LANGUAGES: { label: string; value: string }[] = [
   { label: "German", value: "ger" },
