@@ -34,10 +34,14 @@ const FileNameGenerator: React.FC = () => {
   const [contentTitle, setContentTitle] = useState<string>("projectName");
   const [language, setLanguage] = useState<string>("");
   const [date, setDate] = useState<string>("");
+  const [mediaArt, setMediaArt] = useState<string>(""); // New state for MediaArt
+  const [country, setCountry] = useState<string>(""); // New state for Country
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
   const languageRef = useRef<HTMLSelectElement>(null);
+  const mediaArtRef = useRef<HTMLSelectElement>(null);
+  const countryRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     setContentType(
@@ -47,19 +51,12 @@ const FileNameGenerator: React.FC = () => {
     setContentCategory(getRandomElement(AVAILABLE_CONTENT_CATEGORIES).value);
     setLanguage(getRandomElement(AVAILABLE_LANGUAGES).value);
     setDate(formatDate(new Date())); // Set current date in YYYYMMDD format
+    setMediaArt("defaultMediaArt"); // Default value for MediaArt
+    setCountry("defaultCountry"); // Default value for Country
   }, []);
 
-  const handleContentTypeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setContentType(event.target.value);
-    contentTypeRef.current?.blur();
-  };
-
-  const handleContentCategoryChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setContentCategory(event.target.value);
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDate(event.target.value.replace(/-/g, "")); // Format date as YYYYMMDD
   };
 
   const handleContentTitleChange = (
@@ -68,38 +65,84 @@ const FileNameGenerator: React.FC = () => {
     setContentTitle(event.target.value);
   };
 
+  const handleContentTypeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setContentType(event.target.value);
+  };
+
+  const handleContentCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setContentCategory(event.target.value);
+  };
+
   const handleLanguageChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setLanguage(event.target.value);
   };
 
-  const handleDateChange = (event: any) => {
-    const selectedDate = new Date(event.target.value);
-    setDate(formatDate(selectedDate));
+  const handleMediaArtChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setMediaArt(event.target.value);
+  };
+
+  const handleCountryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setCountry(event.target.value);
   };
 
   const handleCopy = () => {
-    const textToCopy = `${contentType}_${contentCategory}_${contentTitle}_${language}_${date}`;
+    const textToCopy = `${date}_${mediaArt}_${contentTitle}_${contentType}_${contentCategory}_${language}_${country}`;
     navigator.clipboard.writeText(textToCopy);
   };
-
-  const availableContentTypes = AVAILABLE_CONTENT_TYPES;
-  const availableContentCategories = AVAILABLE_CONTENT_CATEGORIES;
-  const availableLanguages = AVAILABLE_LANGUAGES;
-
-  const span: React.RefObject<any> = useRef(null);
-
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    setWidth(span?.current?.offsetWidth ?? 0);
-  }, [contentTitle]);
 
   return (
     <>
       <div className="container">
-        {/* <h1 className="title" data-element-name="StageHeadline" data-object-name="StageHeadline" data-object-counter="StageHeadlines">File Name Generator</h1> */}
         <div>
+          <span className="container-select" title="Date">
+            <span>{date}</span>
+            <input
+              id="date-input"
+              type="date"
+              onChange={handleDateChange}
+              className="date-picker"
+            />
+          </span>
+          _
+          <span className="container-select" title="Media Art">
+            <span>{mediaArt}</span>
+            <select
+              id="media-art-dropdown"
+              value={mediaArt}
+              onChange={handleMediaArtChange}
+              ref={mediaArtRef}
+              className="select-dropdown2"
+            >
+              {AVAILABLE_MEDIA_ARTS.map((art) => (
+                <option key={art.value} value={art.value}>
+                  {art.label}
+                </option>
+              ))}
+            </select>
+          </span>
+          _
+          <span className="hidden">
+            {contentTitle}
+          </span>
+          <input
+            type="text"
+            className="input-title"
+            value={contentTitle}
+            autoFocus
+            onChange={handleContentTitleChange}
+            title="project title"
+          />
+          _
           <span className="container-select" title="Content Type">
             <span>{contentType}</span>
             <select
@@ -109,7 +152,7 @@ const FileNameGenerator: React.FC = () => {
               ref={contentTypeRef}
               className="select-dropdown2"
             >
-              {availableContentTypes.map((group) => (
+              {AVAILABLE_CONTENT_TYPES.map((group) => (
                 <optgroup key={group.category} label={group.category}>
                   {group.types.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -131,7 +174,7 @@ const FileNameGenerator: React.FC = () => {
               className="select-dropdown2"
             >
               <optgroup key="CONTENT CATEGORY" label="CONTENT CATEGORY">
-                {availableContentCategories.map((category) => (
+                {AVAILABLE_CONTENT_CATEGORIES.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
@@ -140,20 +183,7 @@ const FileNameGenerator: React.FC = () => {
             </select>
           </span>
           _
-          <span className="hidden" ref={span}>
-            {contentTitle}
-          </span>
-          <input
-            type="text"
-            className="input-title"
-            value={contentTitle}
-            style={{ width }}
-            autoFocus
-            onChange={handleContentTitleChange}
-            title="project title"
-          />
-          _
-          <span className="container-select">
+          <span className="container-select" title="Language">
             <span>{language}</span>
             <select
               id="language-dropdown"
@@ -162,26 +192,32 @@ const FileNameGenerator: React.FC = () => {
               ref={languageRef}
               className="select-dropdown2"
             >
-              <optgroup key="LANGUAGES" label="LANGUAGES">
-                {availableLanguages.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
-                ))}
-              </optgroup>
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
             </select>
           </span>
           _
-          <span className="container-select" title="Date">
-            <span>{date}</span>
-            <input
-              id="date-input"
-              type="date"
-              onChange={handleDateChange}
-              className="date-picker"
-            />
+          <span className="container-select" title="Country">
+            <span>{country}</span>
+            <select
+              id="country-dropdown"
+              value={country}
+              onChange={handleCountryChange}
+              ref={countryRef}
+              className="select-dropdown2"
+            >
+              {AVAILABLE_COUNTRIES.map((country) => (
+                <option key={country.value} value={country.value}>
+                  {country.label}
+                </option>
+              ))}
+            </select>
           </span>
         </div>
+        <br />
         <button className="copy-button" onClick={handleCopy}>
           📄 copy file name
         </button>
@@ -252,7 +288,296 @@ const AVAILABLE_CONTENT_CATEGORIES: ContentCategory[] = [
 ];
 
 const AVAILABLE_LANGUAGES: { label: string; value: string }[] = [
-  { label: "German", value: "ger" },
-  { label: "French", value: "fr" },
+  { label: "Afrikaans", value: "af" },
+  { label: "Albanian", value: "sq" },
+  { label: "Amharic", value: "am" },
+  { label: "Arabic", value: "ar" },
+  { label: "Armenian", value: "hy" },
+  { label: "Azerbaijani", value: "az" },
+  { label: "Basque", value: "eu" },
+  { label: "Belarusian", value: "be" },
+  { label: "Bengali", value: "bn" },
+  { label: "Bosnian", value: "bs" },
+  { label: "Bulgarian", value: "bg" },
+  { label: "Catalan", value: "ca" },
+  { label: "Chinese (Simplified)", value: "zh-CN" },
+  { label: "Chinese (Traditional)", value: "zh-TW" },
+  { label: "Croatian", value: "hr" },
+  { label: "Czech", value: "cs" },
+  { label: "Danish", value: "da" },
+  { label: "Dutch", value: "nl" },
   { label: "English", value: "en" },
+  { label: "Esperanto", value: "eo" },
+  { label: "Estonian", value: "et" },
+  { label: "Finnish", value: "fi" },
+  { label: "French", value: "fr" },
+  { label: "Galician", value: "gl" },
+  { label: "Georgian", value: "ka" },
+  { label: "German", value: "de" },
+  { label: "Greek", value: "el" },
+  { label: "Gujarati", value: "gu" },
+  { label: "Haitian Creole", value: "ht" },
+  { label: "Hebrew", value: "he" },
+  { label: "Hindi", value: "hi" },
+  { label: "Hungarian", value: "hu" },
+  { label: "Icelandic", value: "is" },
+  { label: "Indonesian", value: "id" },
+  { label: "Irish", value: "ga" },
+  { label: "Italian", value: "it" },
+  { label: "Japanese", value: "ja" },
+  { label: "Javanese", value: "jv" },
+  { label: "Kannada", value: "kn" },
+  { label: "Kazakh", value: "kk" },
+  { label: "Khmer", value: "km" },
+  { label: "Korean", value: "ko" },
+  { label: "Kurdish", value: "ku" },
+  { label: "Kyrgyz", value: "ky" },
+  { label: "Lao", value: "lo" },
+  { label: "Latvian", value: "lv" },
+  { label: "Lithuanian", value: "lt" },
+  { label: "Luxembourgish", value: "lb" },
+  { label: "Macedonian", value: "mk" },
+  { label: "Malagasy", value: "mg" },
+  { label: "Malay", value: "ms" },
+  { label: "Malayalam", value: "ml" },
+  { label: "Maltese", value: "mt" },
+  { label: "Maori", value: "mi" },
+  { label: "Marathi", value: "mr" },
+  { label: "Mongolian", value: "mn" },
+  { label: "Nepali", value: "ne" },
+  { label: "Norwegian", value: "no" },
+  { label: "Pashto", value: "ps" },
+  { label: "Persian", value: "fa" },
+  { label: "Polish", value: "pl" },
+  { label: "Portuguese", value: "pt" },
+  { label: "Punjabi", value: "pa" },
+  { label: "Romanian", value: "ro" },
+  { label: "Russian", value: "ru" },
+  { label: "Samoan", value: "sm" },
+  { label: "Serbian", value: "sr" },
+  { label: "Sinhala", value: "si" },
+  { label: "Slovak", value: "sk" },
+  { label: "Slovenian", value: "sl" },
+  { label: "Somali", value: "so" },
+  { label: "Spanish", value: "es" },
+  { label: "Sundanese", value: "su" },
+  { label: "Swahili", value: "sw" },
+  { label: "Swedish", value: "sv" },
+  { label: "Tagalog", value: "tl" },
+  { label: "Tajik", value: "tg" },
+  { label: "Tamil", value: "ta" },
+  { label: "Telugu", value: "te" },
+  { label: "Thai", value: "th" },
+  { label: "Turkish", value: "tr" },
+  { label: "Ukrainian", value: "uk" },
+  { label: "Urdu", value: "ur" },
+  { label: "Uzbek", value: "uz" },
+  { label: "Vietnamese", value: "vi" },
+  { label: "Welsh", value: "cy" },
+  { label: "Xhosa", value: "xh" },
+  { label: "Yiddish", value: "yi" },
+  { label: "Yoruba", value: "yo" },
+  { label: "Zulu", value: "zu" },
+];
+
+const AVAILABLE_COUNTRIES: { label: string; value: string }[] = [
+  { label: "Afghanistan", value: "af" },
+  { label: "Albania", value: "al" },
+  { label: "Algeria", value: "dz" },
+  { label: "Andorra", value: "ad" },
+  { label: "Angola", value: "ao" },
+  { label: "Argentina", value: "ar" },
+  { label: "Armenia", value: "am" },
+  { label: "Australia", value: "au" },
+  { label: "Austria", value: "at" },
+  { label: "Azerbaijan", value: "az" },
+  { label: "Bahamas", value: "bs" },
+  { label: "Bahrain", value: "bh" },
+  { label: "Bangladesh", value: "bd" },
+  { label: "Barbados", value: "bb" },
+  { label: "Belarus", value: "by" },
+  { label: "Belgium", value: "be" },
+  { label: "Belize", value: "bz" },
+  { label: "Benin", value: "bj" },
+  { label: "Bhutan", value: "bt" },
+  { label: "Bolivia", value: "bo" },
+  { label: "Bosnia and Herzegovina", value: "ba" },
+  { label: "Botswana", value: "bw" },
+  { label: "Brazil", value: "br" },
+  { label: "Brunei", value: "bn" },
+  { label: "Bulgaria", value: "bg" },
+  { label: "Burkina Faso", value: "bf" },
+  { label: "Burundi", value: "bi" },
+  { label: "Cambodia", value: "kh" },
+  { label: "Cameroon", value: "cm" },
+  { label: "Canada", value: "ca" },
+  { label: "Cape Verde", value: "cv" },
+  { label: "Central African Republic", value: "cf" },
+  { label: "Chad", value: "td" },
+  { label: "Chile", value: "cl" },
+  { label: "China", value: "cn" },
+  { label: "Colombia", value: "co" },
+  { label: "Comoros", value: "km" },
+  { label: "Congo", value: "cg" },
+  { label: "Costa Rica", value: "cr" },
+  { label: "Croatia", value: "hr" },
+  { label: "Cuba", value: "cu" },
+  { label: "Cyprus", value: "cy" },
+  { label: "Czech Republic", value: "cz" },
+  { label: "Denmark", value: "dk" },
+  { label: "Djibouti", value: "dj" },
+  { label: "Dominica", value: "dm" },
+  { label: "Dominican Republic", value: "do" },
+  { label: "Ecuador", value: "ec" },
+  { label: "Egypt", value: "eg" },
+  { label: "El Salvador", value: "sv" },
+  { label: "Equatorial Guinea", value: "gq" },
+  { label: "Eritrea", value: "er" },
+  { label: "Estonia", value: "ee" },
+  { label: "Eswatini", value: "sz" },
+  { label: "Ethiopia", value: "et" },
+  { label: "Fiji", value: "fj" },
+  { label: "Finland", value: "fi" },
+  { label: "France", value: "fr" },
+  { label: "Gabon", value: "ga" },
+  { label: "Gambia", value: "gm" },
+  { label: "Georgia", value: "ge" },
+  { label: "Germany", value: "ger" },
+  { label: "Ghana", value: "gh" },
+  { label: "Greece", value: "gr" },
+  { label: "Grenada", value: "gd" },
+  { label: "Guatemala", value: "gt" },
+  { label: "Guinea", value: "gn" },
+  { label: "Guinea-Bissau", value: "gw" },
+  { label: "Guyana", value: "gy" },
+  { label: "Haiti", value: "ht" },
+  { label: "Honduras", value: "hn" },
+  { label: "Hungary", value: "hu" },
+  { label: "Iceland", value: "is" },
+  { label: "India", value: "in" },
+  { label: "Indonesia", value: "id" },
+  { label: "Iran", value: "ir" },
+  { label: "Iraq", value: "iq" },
+  { label: "Ireland", value: "ie" },
+  { label: "Israel", value: "il" },
+  { label: "Italy", value: "it" },
+  { label: "Jamaica", value: "jm" },
+  { label: "Japan", value: "jp" },
+  { label: "Jordan", value: "jo" },
+  { label: "Kazakhstan", value: "kz" },
+  { label: "Kenya", value: "ke" },
+  { label: "Kiribati", value: "ki" },
+  { label: "Korea (North)", value: "kp" },
+  { label: "Korea (South)", value: "kr" },
+  { label: "Kuwait", value: "kw" },
+  { label: "Kyrgyzstan", value: "kg" },
+  { label: "Laos", value: "la" },
+  { label: "Latvia", value: "lv" },
+  { label: "Lebanon", value: "lb" },
+  { label: "Lesotho", value: "ls" },
+  { label: "Liberia", value: "lr" },
+  { label: "Libya", value: "ly" },
+  { label: "Liechtenstein", value: "li" },
+  { label: "Lithuania", value: "lt" },
+  { label: "Luxembourg", value: "lu" },
+  { label: "Madagascar", value: "mg" },
+  { label: "Malawi", value: "mw" },
+  { label: "Malaysia", value: "my" },
+  { label: "Maldives", value: "mv" },
+  { label: "Mali", value: "ml" },
+  { label: "Malta", value: "mt" },
+  { label: "Marshall Islands", value: "mh" },
+  { label: "Mauritania", value: "mr" },
+  { label: "Mauritius", value: "mu" },
+  { label: "Mexico", value: "mx" },
+  { label: "Micronesia", value: "fm" },
+  { label: "Moldova", value: "md" },
+  { label: "Monaco", value: "mc" },
+  { label: "Mongolia", value: "mn" },
+  { label: "Montenegro", value: "me" },
+  { label: "Morocco", value: "ma" },
+  { label: "Mozambique", value: "mz" },
+  { label: "Myanmar", value: "mm" },
+  { label: "Namibia", value: "na" },
+  { label: "Nauru", value: "nr" },
+  { label: "Nepal", value: "np" },
+  { label: "Netherlands", value: "nl" },
+  { label: "New Zealand", value: "nz" },
+  { label: "Nicaragua", value: "ni" },
+  { label: "Niger", value: "ne" },
+  { label: "Nigeria", value: "ng" },
+  { label: "North Macedonia", value: "mk" },
+  { label: "Norway", value: "no" },
+  { label: "Oman", value: "om" },
+  { label: "Pakistan", value: "pk" },
+  { label: "Palau", value: "pw" },
+  { label: "Panama", value: "pa" },
+  { label: "Papua New Guinea", value: "pg" },
+  { label: "Paraguay", value: "py" },
+  { label: "Peru", value: "pe" },
+  { label: "Philippines", value: "ph" },
+  { label: "Poland", value: "pl" },
+  { label: "Portugal", value: "pt" },
+  { label: "Qatar", value: "qa" },
+  { label: "Romania", value: "ro" },
+  { label: "Russia", value: "ru" },
+  { label: "Rwanda", value: "rw" },
+  { label: "Saint Kitts and Nevis", value: "kn" },
+  { label: "Saint Lucia", value: "lc" },
+  { label: "Saint Vincent and the Grenadines", value: "vc" },
+  { label: "Samoa", value: "ws" },
+  { label: "San Marino", value: "sm" },
+  { label: "Sao Tome and Principe", value: "st" },
+  { label: "Saudi Arabia", value: "sa" },
+  { label: "Senegal", value: "sn" },
+  { label: "Serbia", value: "rs" },
+  { label: "Seychelles", value: "sc" },
+  { label: "Sierra Leone", value: "sl" },
+  { label: "Singapore", value: "sg" },
+  { label: "Slovakia", value: "sk" },
+  { label: "Slovenia", value: "si" },
+  { label: "Solomon Islands", value: "sb" },
+  { label: "Somalia", value: "so" },
+  { label: "South Africa", value: "za" },
+  { label: "Spain", value: "es" },
+  { label: "Sri Lanka", value: "lk" },
+  { label: "Sudan", value: "sd" },
+  { label: "Suriname", value: "sr" },
+  { label: "Sweden", value: "se" },
+  { label: "Switzerland", value: "ch" },
+  { label: "Syria", value: "sy" },
+  { label: "Taiwan", value: "tw" },
+  { label: "Tajikistan", value: "tj" },
+  { label: "Tanzania", value: "tz" },
+  { label: "Thailand", value: "th" },
+  { label: "Togo", value: "tg" },
+  { label: "Tonga", value: "to" },
+  { label: "Trinidad and Tobago", value: "tt" },
+  { label: "Tunisia", value: "tn" },
+  { label: "Turkey", value: "tr" },
+  { label: "Turkmenistan", value: "tm" },
+  { label: "Tuvalu", value: "tv" },
+  { label: "Uganda", value: "ug" },
+  { label: "Ukraine", value: "ua" },
+  { label: "United Arab Emirates", value: "ae" },
+  { label: "United Kingdom", value: "uk" },
+  { label: "United States", value: "us" },
+  { label: "Uruguay", value: "uy" },
+  { label: "Uzbekistan", value: "uz" },
+  { label: "Vanuatu", value: "vu" },
+  { label: "Vatican City", value: "va" },
+  { label: "Venezuela", value: "ve" },
+  { label: "Vietnamese", value: "vi" },
+  { label: "Welsh", value: "cy" },
+  { label: "Xhosa", value: "xh" },
+  { label: "Yiddish", value: "yi" },
+  { label: "Yoruba", value: "yo" },
+  { label: "Zulu", value: "zu" },
+];
+
+const AVAILABLE_MEDIA_ARTS: { label: string; value: string }[] = [
+  { label: "KSB Layout", value: "KSBlay_" },
+  { label: "KSB Video", value: "KSBvid_" },
+  { label: "KSB Drawings", value: "KSBdrw_" },
+  { label: "KSB images + Image Number", value: "KSBimg" },
 ];
