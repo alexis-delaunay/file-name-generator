@@ -34,7 +34,7 @@ const FileNameGenerator: React.FC = () => {
   const [contentTitle, setContentTitle] = useState<string>("projectName");
   const [language, setLanguage] = useState<string>("");
   const [date, setDate] = useState<string>("");
-  const [mediaArt, setMediaArt] = useState<string>(""); // New state for MediaArt
+  const [mediaArt, setMediaArt] = useState<string>("KSBlay"); // New state for MediaArt
   const [country, setCountry] = useState<string>(""); // New state for Country
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
@@ -44,11 +44,12 @@ const FileNameGenerator: React.FC = () => {
   const countryRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
-    setContentType(
-      getRandomElement(AVAILABLE_CONTENT_TYPES.flatMap((group) => group.types))
-        .value
-    );
-    setContentCategory(getRandomElement(AVAILABLE_CONTENT_CATEGORIES).value);
+    const allContentTypes = Object.values(AVAILABLE_CONTENT_TYPES).flat(); // Flatten the content types
+    setContentType(getRandomElement(allContentTypes).value); // Select a random content type
+
+    const allContentCategories = Object.values(AVAILABLE_CONTENT_CATEGORIES).flat(); // Flatten the content categories
+    setContentCategory(getRandomElement(allContentCategories).value); // Select a random content category
+
     setLanguage(getRandomElement(AVAILABLE_LANGUAGES).value);
     setDate(formatDate(new Date())); // Set current date in YYYYMMDD format
     setMediaArt("defaultMediaArt"); // Default value for MediaArt
@@ -86,7 +87,12 @@ const FileNameGenerator: React.FC = () => {
   const handleMediaArtChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setMediaArt(event.target.value);
+    const selectedMediaArt = event.target.value;
+    setMediaArt(selectedMediaArt);
+
+    // Automatically select the first option in the filtered content types
+    const firstContentType = AVAILABLE_CONTENT_TYPES[selectedMediaArt]?.[0]?.value || "";
+    setContentType(firstContentType);
   };
 
   const handleCountryChange = (
@@ -99,6 +105,9 @@ const FileNameGenerator: React.FC = () => {
     const textToCopy = `${date}_${mediaArt}_${contentTitle}_${contentType}_${contentCategory}_${language}_${country}`;
     navigator.clipboard.writeText(textToCopy);
   };
+
+  const filteredContentTypes = AVAILABLE_CONTENT_TYPES[mediaArt] || [];
+  const filteredContentCategories = AVAILABLE_CONTENT_CATEGORIES[mediaArt] || [];
 
   return (
     <>
@@ -152,37 +161,36 @@ const FileNameGenerator: React.FC = () => {
               ref={contentTypeRef}
               className="select-dropdown2"
             >
-              {AVAILABLE_CONTENT_TYPES.map((group) => (
-                <optgroup key={group.category} label={group.category}>
-                  {group.types.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </optgroup>
+              {filteredContentTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
               ))}
             </select>
           </span>
           _
-          <span className="container-select" title="Content Category">
-            <span>{contentCategory}</span>
-            <select
-              id="content-category-dropdown"
-              value={contentCategory}
-              onChange={handleContentCategoryChange}
-              ref={contentCategoryRef}
-              className="select-dropdown2"
-            >
-              <optgroup key="CONTENT CATEGORY" label="CONTENT CATEGORY">
-                {AVAILABLE_CONTENT_CATEGORIES.map((category) => (
+          {filteredContentCategories.length > 0 && (
+            <>
+            <span className="container-select" title="Content Category">
+              <span>{contentCategory}</span>
+              <select
+                id="content-category-dropdown"
+                value={contentCategory}
+                onChange={handleContentCategoryChange}
+                ref={contentCategoryRef}
+                className="select-dropdown2"
+              >
+                {filteredContentCategories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
                 ))}
-              </optgroup>
-            </select>
-          </span>
-          _
+              </select>
+            </span>
+            _
+            </>
+
+          )}
           <span className="container-select" title="Language">
             <span>{language}</span>
             <select
@@ -228,64 +236,64 @@ const FileNameGenerator: React.FC = () => {
 
 export default FileNameGenerator;
 
-const AVAILABLE_CONTENT_TYPES: ContentTypeCategory[] = [
-  {
-    category: "DRAWING",
-    types: [
-      { label: "CharacteristicCurve", value: "CCdra" },
-      { label: "Grafic", value: "GRAFdra" },
-      { label: "Illustration", value: "ILLdra" },
-      { label: "SectionalDrawing", value: "SDdra" },
-      { label: "Logos", value: "LOGdra" },
-      { label: "Product", value: "prod" },
-    ],
-  },
-  {
-    category: "LAYOUT",
-    types: [
-      { label: "Brochure", value: "BROlay" },
-      { label: "Flyer", value: "FLYlay" },
-      { label: "Know-How", value: "KNOWlay" },
-      { label: "OnePaper", value: "P1lay" },
-      { label: "TwoPaper", value: "P2Play" },
-      { label: "ReferenceLeaflets", value: "REFlay" },
-      { label: "WhitePaper", value: "WPlay" },
-      { label: "Presentations", value: "PPTlay" },
-      { label: "Advertising", value: "ADlay" },
-      { label: "Keyvisual", value: "KEYlay" },
-      { label: "TradeFair", value: "TFlay" },
-      { label: "CircularWall", value: "CWALLlay" },
-      { label: "RollUp", value: "ROLLUPlay" },
-      { label: "Poster", value: "PSlay" },
-      { label: "Labelling", value: "LABlay" },
-    ],
-  },
-  {
-    category: "VIDEO",
-    types: [
-      { label: "ExpertVideo", value: "EXPvideo" },
-      { label: "QuickGuideVideo", value: "GUIDvideo" },
-      { label: "FootageVideo", value: "FOOTvideo" },
-      { label: "OnlineSeminarVideo", value: "SEMINvideo" },
-      { label: "ProductVideo", value: "PRODvideo" },
-      { label: "DocumentaryVideo", value: "DOCVideo" },
-      { label: "ImageVideo", value: "IMAGVideo" },
-      { label: "StoryTellingVideo", value: "STORYvideo" },
-      { label: "Message&NewsVideo", value: "NEW" },
-    ],
-  },
-];
+const AVAILABLE_CONTENT_TYPES: { [key: string]: { label: string; value: string }[] } = {
+  KSBlay: [
+    { label: "Brochure", value: "BRO" },
+    { label: "Flyer", value: "FLY" },
+    { label: "OnePager", value: "P1" },
+    { label: "TwoPager", value: "P2" },
+    { label: "WhitePaper", value: "WP" },
+    { label: "Presentations", value: "PPT" },
+    { label: "Advertising", value: "AD" },
+    { label: "Keyvisual", value: "KEY" },
+    { label: "TradeFairPanels", value: "TFP" },
+    { label: "PopUpPanels", value: "POP" },
+    { label: "RollUp", value: "ROLL" },
+    { label: "Poster", value: "PS" },
+    { label: "PromotionalArticle", value: "PA" },
+    { label: "Invitation", value: "INV" },
+    { label: "ScreenDesign", value: "SD" },
+    { label: "ReferenceLeaflets", value: "REF" },
+  ],
+  KSBvid: [
+    { label: "Expert", value: "EXP" },
+    { label: "QuickGuide", value: "GUID" },
+    { label: "Product", value: "PROD" },
+    { label: "Image", value: "IMAG" },
+    { label: "StoryTelling", value: "STORY" },
+    { label: "Message&News", value: "NEWS" },
+    { label: "Teaser", value: "TEAS" },
+    { label: "Advertorialvideo", value: "AD" },
+    { label: "Documentary", value: "DOCU" },
+    { label: "OnlineSeminar", value: "SEM" },
+    { label: "Footage", value: "FOOT" },
+    { label: "LiveStream ", value: "LIVE" },
+  ],
+  KSBdrw: [
+    { label: "CharacteristicCurve", value: "CURV" },
+    { label: "SectionalDrawing", value: "SD" },
+    { label: "Logos", value: "LOG" },
+    { label: "Illustration", value: "ILL" },
+    { label: "Layout", value: "LAY" },
+  ],
+  KSBimg: [], // No options for KSBimg
+};
 
-const AVAILABLE_CONTENT_CATEGORIES: ContentCategory[] = [
-  { label: "General Content", value: "gen" },
-  { label: "Fairs and Events (e.g. trade fair wall)", value: "event" },
-  { label: "Campaigning (e.g. special sizes for ads)", value: "camp" },
-  { label: "Sales Support", value: "sales" },
-  { label: "Service Support", value: "serv" },
-  { label: "Product", value: "prod" },
-  { label: "Communication", value: "com" },
-  { label: "Management", value: "manag" },
-];
+const AVAILABLE_CONTENT_CATEGORIES: { [key: string]: { label: string; value: string }[] } = {
+  KSBlay: [
+    { label: "General Content", value: "gen" },
+    { label: "Fairs and Events", value: "event" },
+    { label: "Campaigning", value: "camp" },
+    { label: "Sales Support", value: "sales" },
+    { label: "Service Support", value: "serv" },
+    { label: "Product", value: "prod" },
+    { label: "People", value: "peopl" },
+    { label: "Know-How", value: "know" },
+  ],
+  KSBvid: [], // No options for KSBvid
+  KSBdrw: [], // No options for KSBdrw
+  KSBimg: [], // No options for KSBimg
+};
 
 const AVAILABLE_LANGUAGES: { label: string; value: string }[] = [
   { label: "Afrikaans", value: "af" },
@@ -576,8 +584,8 @@ const AVAILABLE_COUNTRIES: { label: string; value: string }[] = [
 ];
 
 const AVAILABLE_MEDIA_ARTS: { label: string; value: string }[] = [
-  { label: "KSB Layout", value: "KSBlay_" },
-  { label: "KSB Video", value: "KSBvid_" },
-  { label: "KSB Drawings", value: "KSBdrw_" },
+  { label: "KSB Layout", value: "KSBlay" },
+  { label: "KSB Video", value: "KSBvid" },
+  { label: "KSB Drawings", value: "KSBdrw" },
   { label: "KSB images + Image Number", value: "KSBimg" },
 ];
