@@ -1,20 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./FileNameGenerator.css";
 
-interface ContentType {
-  label: string;
-  value: string;
-}
-
-interface ContentCategory {
-  label: string;
-  value: string;
-}
-
-interface ContentTypeCategory {
-  category: string;
-  types: ContentType[];
-}
 
 const getRandomElement = <T,>(array: T[]): T => {
   return array[Math.floor(Math.random() * array.length)];
@@ -171,23 +157,23 @@ const FileNameGenerator: React.FC = () => {
           _
           {filteredContentCategories.length > 0 && (
             <>
-            <span className="container-select" title="Content Category">
-              <span>{contentCategory}</span>
-              <select
-                id="content-category-dropdown"
-                value={contentCategory}
-                onChange={handleContentCategoryChange}
-                ref={contentCategoryRef}
-                className="select-dropdown2"
-              >
-                {filteredContentCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-            _
+              <span className="container-select" title="Content Category">
+                <span>{contentCategory}</span>
+                <select
+                  id="content-category-dropdown"
+                  value={contentCategory}
+                  onChange={handleContentCategoryChange}
+                  ref={contentCategoryRef}
+                  className="select-dropdown2"
+                >
+                  {filteredContentCategories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+              _
             </>
 
           )}
