@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./FileNameGenerator.css";
 
 
@@ -16,8 +16,8 @@ const formatDate = (dateString: string): string => {
 
 const FileNameGenerator: React.FC = () => {
   const [contentType, setContentType] = useState<string>("");
-  const [contentCategory, setContentCategory] = useState<string>("ContentCategory");
-  const [contentTitle, setContentTitle] = useState<string>("ProjectName");
+  const [contentCategory, setContentCategory] = useState<string>("");
+  const [contentTitle, setContentTitle] = useState<string>("");
   const [language, setLanguage] = useState<string>("Language");
   const [date, setDate] = useState<string>("Date");
   const [mediaArt, setMediaArt] = useState<string>("");
@@ -33,7 +33,7 @@ const FileNameGenerator: React.FC = () => {
   const mediaArtRef = useRef<HTMLSelectElement>(null);
   const countryRef = useRef<HTMLSelectElement>(null);
 
-  useEffect(() => {
+  useEffect(() => {return
     const allContentTypes = Object.values(AVAILABLE_CONTENT_TYPES).flat(); // Flatten the content types
 
     // setContentType(getRandomElement(allContentTypes).value); // Select a random content type
@@ -107,6 +107,10 @@ const FileNameGenerator: React.FC = () => {
     // Automatically select the first option in the filtered content types
     const firstContentType = AVAILABLE_CONTENT_TYPES[selectedMediaArt]?.[0]?.value || "";
     setContentType(firstContentType);
+
+    // Automatically select the first option in the filtered content categories
+    const firstContentCategory = AVAILABLE_CONTENT_CATEGORIES[selectedMediaArt]?.[0]?.value || "";
+    setContentCategory(firstContentCategory);
   };
 
   const handleCountryChange = (
@@ -128,15 +132,15 @@ const FileNameGenerator: React.FC = () => {
       return;
     }
     if (contentTitle.trim() === "") {
-      setErrorMessage("Project Name cannot be empty.");
+      setErrorMessage("Please enter the Project Name.");
       setSuccessMessage(""); // Clear success message
       return;
     }
-    if (contentCategory === "ContentCategory") {
-      setErrorMessage("Please select a valid Content Category.");
-      setSuccessMessage(""); // Clear success message
-      return;
-    }
+    // if (contentCategory === "ContentCategory") {
+    //   setErrorMessage("Please select a valid Content Category.");
+    //   setSuccessMessage(""); // Clear success message
+    //   return;
+    // }
 
     // Clear error message if all validations pass
     setErrorMessage("");
@@ -162,8 +166,8 @@ const FileNameGenerator: React.FC = () => {
     });
   };
 
-  const filteredContentTypes = AVAILABLE_CONTENT_TYPES[mediaArt] || [];
-  const filteredContentCategories = AVAILABLE_CONTENT_CATEGORIES[mediaArt] || [];
+  const filteredContentTypes = useMemo(() => AVAILABLE_CONTENT_TYPES[mediaArt] || [], [mediaArt]);
+  const filteredContentCategories = useMemo(() => AVAILABLE_CONTENT_CATEGORIES[mediaArt] || [], [mediaArt]);
 
   return (
     <>
@@ -209,7 +213,7 @@ const FileNameGenerator: React.FC = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide suggestions on blur with delay
               suppressContentEditableWarning={true}
             >
-              {contentTitle}
+              {contentTitle === "" ? "ProjectName" : contentTitle}
             </span>
             {isFocused && suggestions.length > 0 && (
               <ul className="autocomplete-suggestions">
