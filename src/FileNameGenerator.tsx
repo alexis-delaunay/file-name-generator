@@ -20,8 +20,9 @@ const FileNameGenerator: React.FC = () => {
   const [contentTitle, setContentTitle] = useState<string>("ProjectName");
   const [language, setLanguage] = useState<string>("Language");
   const [date, setDate] = useState<string>("Date");
-  const [mediaArt, setMediaArt] = useState<string>("MediaArt");
+  const [mediaArt, setMediaArt] = useState<string>("");
   const [country, setCountry] = useState<string>("Country");
+  const [errorMessage, setErrorMessage] = useState<string>(""); // New state for error message
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
@@ -31,7 +32,8 @@ const FileNameGenerator: React.FC = () => {
 
   useEffect(() => {
     const allContentTypes = Object.values(AVAILABLE_CONTENT_TYPES).flat(); // Flatten the content types
-    setContentType(getRandomElement(allContentTypes).value); // Select a random content type
+
+    // setContentType(getRandomElement(allContentTypes).value); // Select a random content type
     // setContentType("ContentType");
     const allContentCategories = Object.values(AVAILABLE_CONTENT_CATEGORIES).flat(); // Flatten the content categories
     setContentCategory(getRandomElement(allContentCategories).value); // Select a random content category
@@ -39,7 +41,7 @@ const FileNameGenerator: React.FC = () => {
     setLanguage("Language");
     // setDate(formatDate(new Date()));
     setDate("Date");
-    setMediaArt("MediaArt");
+    // setMediaArt("MediaArt");
     setCountry("Country");
   }, []);
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +91,27 @@ const FileNameGenerator: React.FC = () => {
   };
 
   const handleCopy = () => {
+    // Validation logic
+    if (date === "Date") {
+      setErrorMessage("Please select a valid date.");
+      return;
+    }
+    if (mediaArt === "MediaArt") {
+      setErrorMessage("Please select a valid Media Art.");
+      return;
+    }
+    if (contentTitle.trim() === "") {
+      setErrorMessage("Project Name cannot be empty.");
+      return;
+    }
+    if (contentCategory === "ContentCategory") {
+      setErrorMessage("Please select a valid Content Category.");
+      return;
+    }
+
+    // Clear error message if all validations pass
+    setErrorMessage("");
+
     const languagePart = language !== "Language" ? `_${language}` : "";
     const countryPart = country !== "Country" ? `_${country}` : "";
     const contentTypePart = contentType !== "" ? `_${contentType}` : "";
@@ -115,6 +138,7 @@ const FileNameGenerator: React.FC = () => {
           </span>
           <span>_</span>
           <span className="container-select" title="Media Art">
+            {mediaArt === "" && <span>MediaArt</span>}
             <span>{mediaArt}</span>
             <select
               id="media-art-dropdown"
@@ -123,6 +147,9 @@ const FileNameGenerator: React.FC = () => {
               ref={mediaArtRef}
               className="select-dropdown2"
             >
+              <option value="" disabled>
+                Select Media Art
+              </option>
               {AVAILABLE_MEDIA_ARTS.map((art) => (
                 <option key={art.value} value={art.value}>
                   {art.label}
@@ -131,7 +158,13 @@ const FileNameGenerator: React.FC = () => {
             </select>
           </span>
           <span>_</span>
-          <span contentEditable="true" className="input-title" onChange={handleContentTitleChange}>{contentTitle}</span>
+          <span
+            contentEditable="true"
+            className="input-title"
+            onInput={(e) => setContentTitle(e.currentTarget.textContent || "")}
+          >
+            {contentTitle}
+          </span>
           <span>_</span>
           <span className="container-select" title="Content Type">
             <span>{contentType}</span>
@@ -204,6 +237,9 @@ const FileNameGenerator: React.FC = () => {
               ref={countryRef}
               className="select-dropdown2"
             >
+              <option value="" disabled>
+                Select Country
+              </option>
               {AVAILABLE_COUNTRIES.map((country) => (
                 <option key={country.value} value={country.value}>
                   {country.label}
@@ -216,6 +252,7 @@ const FileNameGenerator: React.FC = () => {
         <button className="copy-button" onClick={handleCopy}>
           📄 Copy File Name
         </button>
+        <span style={{ color: "red", height: 0 }}>{errorMessage}</span>
       </div>
     </>
   );
