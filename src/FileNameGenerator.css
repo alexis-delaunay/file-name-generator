@@ -142,3 +142,7 @@
   /* font-family: Courier; */
   font-size: medium;
 }
+
+.unset {
+  color: dimgray;
+}

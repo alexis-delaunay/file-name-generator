@@ -172,7 +172,10 @@ const FileNameGenerator: React.FC = () => {
             </>
 
           )}
-          <span className="container-select" title="Language">
+          <span
+            className={`container-select ${language === "Language" ? "unset" : ""}`}
+            title="Language"
+          >
             <span>{language}</span>
             <select
               id="language-dropdown"
@@ -192,7 +195,7 @@ const FileNameGenerator: React.FC = () => {
             </select>
           </span>
           _
-          <span className="container-select" title="Country">
+          <span className={`container-select ${country === "Country" ? "unset" : ""}`} title="Country">
             <span>{country}</span>
             <select
               id="country-dropdown"
