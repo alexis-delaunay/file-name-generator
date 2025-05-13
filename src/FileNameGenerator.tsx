@@ -23,6 +23,7 @@ const FileNameGenerator: React.FC = () => {
   const [mediaArt, setMediaArt] = useState<string>("");
   const [country, setCountry] = useState<string>("Country");
   const [errorMessage, setErrorMessage] = useState<string>(""); // New state for error message
+  const [successMessage, setSuccessMessage] = useState<string>(""); // New state for success message
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
@@ -94,18 +95,22 @@ const FileNameGenerator: React.FC = () => {
     // Validation logic
     if (date === "Date") {
       setErrorMessage("Please select a valid date.");
+      setSuccessMessage(""); // Clear success message
       return;
     }
     if (mediaArt === "MediaArt") {
       setErrorMessage("Please select a valid Media Art.");
+      setSuccessMessage(""); // Clear success message
       return;
     }
     if (contentTitle.trim() === "") {
       setErrorMessage("Project Name cannot be empty.");
+      setSuccessMessage(""); // Clear success message
       return;
     }
     if (contentCategory === "ContentCategory") {
       setErrorMessage("Please select a valid Content Category.");
+      setSuccessMessage(""); // Clear success message
       return;
     }
 
@@ -117,7 +122,12 @@ const FileNameGenerator: React.FC = () => {
     const contentTypePart = contentType !== "" ? `_${contentType}` : "";
     const contentCategoryPart = contentCategory !== "" ? `_${contentCategory}` : "";
     const textToCopy = `${date}_${mediaArt}_${contentTitle}${contentTypePart}${contentCategoryPart}${languagePart}${countryPart}`;
-    navigator.clipboard.writeText(textToCopy);
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setSuccessMessage("File name copied successfully!"); // Set success message
+    }).catch(() => {
+      setErrorMessage("Failed to copy the file name."); // Handle copy failure
+    });
   };
 
   const filteredContentTypes = AVAILABLE_CONTENT_TYPES[mediaArt] || [];
@@ -252,8 +262,13 @@ const FileNameGenerator: React.FC = () => {
         <button className="copy-button" onClick={handleCopy}>
           📄 Copy File Name
         </button>
-        <span style={{ color: "red", height: 0 }}>{errorMessage}</span>
-      </div>
+        {errorMessage && <span style={{ color: "red", height: 0 }}>{errorMessage}</span>}
+        {successMessage && (
+          <span style={{ color: "green", height: 0 }}>
+        ✅ {successMessage}
+      </span>
+        )}
+    </div >
     </>
   );
 };
