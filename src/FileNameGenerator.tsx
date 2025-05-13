@@ -24,6 +24,8 @@ const FileNameGenerator: React.FC = () => {
   const [country, setCountry] = useState<string>("Country");
   const [errorMessage, setErrorMessage] = useState<string>(""); // New state for error message
   const [successMessage, setSuccessMessage] = useState<string>(""); // New state for success message
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isFocused, setIsFocused] = useState<boolean>(false); // Track focus state
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
@@ -50,10 +52,32 @@ const FileNameGenerator: React.FC = () => {
     setDate(formatDate(event.target.value)); // Format date as YYYYMMDD
   };
 
-  const handleContentTitleChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setContentTitle(event.target.value);
+  useEffect(() => {
+    // Load stored content titles from localStorage on component mount
+    const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+    setSuggestions(storedTitles);
+  }, []);
+
+  const handleContentTitleChange = (event: React.FormEvent<HTMLSpanElement>) => {
+    const newTitle = event.currentTarget.textContent || "";
+    setContentTitle(newTitle);
+
+    // Show suggestions only if the user has entered something
+    if (newTitle.trim() !== "") {
+      const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+      const filteredSuggestions = storedTitles.filter((title: string) =>
+        title.toLowerCase().includes(newTitle.toLowerCase())
+      );
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setContentTitle(suggestion);
+    setSuggestions([]); // Clear suggestions after selection
+    setIsFocused(false); // Hide suggestions
   };
 
   const handleContentTypeChange = (
@@ -98,7 +122,7 @@ const FileNameGenerator: React.FC = () => {
       setSuccessMessage(""); // Clear success message
       return;
     }
-    if (mediaArt === "MediaArt") {
+    if (mediaArt === "MediaArt" || mediaArt === "") {
       setErrorMessage("Please select a valid Media Art.");
       setSuccessMessage(""); // Clear success message
       return;
@@ -123,6 +147,14 @@ const FileNameGenerator: React.FC = () => {
     const contentCategoryPart = contentCategory !== "" ? `_${contentCategory}` : "";
     const textToCopy = `${date}_${mediaArt}_${contentTitle}${contentTypePart}${contentCategoryPart}${languagePart}${countryPart}`;
 
+    // Update localStorage with the new contentTitle
+    const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+    if (!storedTitles.includes(contentTitle)) {
+      const updatedTitles = [...storedTitles, contentTitle];
+      localStorage.setItem("contentTitles", JSON.stringify(updatedTitles));
+    }
+
+    // Copy the file name to the clipboard
     navigator.clipboard.writeText(textToCopy).then(() => {
       setSuccessMessage("File name copied successfully!"); // Set success message
     }).catch(() => {
@@ -168,30 +200,50 @@ const FileNameGenerator: React.FC = () => {
             </select>
           </span>
           <span>_</span>
-          <span
-            contentEditable="true"
-            className="input-title"
-            onInput={(e) => setContentTitle(e.currentTarget.textContent || "")}
-          >
-            {contentTitle}
-          </span>
-          <span>_</span>
-          <span className="container-select" title="Content Type">
-            <span>{contentType}</span>
-            <select
-              id="content-type-dropdown"
-              value={contentType}
-              onChange={handleContentTypeChange}
-              ref={contentTypeRef}
-              className="select-dropdown2"
+          <span style={{ position: "relative" }}>
+            <span
+              contentEditable="true"
+              className="input-title"
+              onInput={handleContentTitleChange}
+              onFocus={() => setIsFocused(true)} // Show suggestions on focus
+              onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide suggestions on blur with delay
+              suppressContentEditableWarning={true}
             >
-              {filteredContentTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+              {contentTitle}
+            </span>
+            {isFocused && suggestions.length > 0 && (
+              <ul className="autocomplete-suggestions">
+                {suggestions.map((suggestion, index) => (
+                  <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </span>
+          {filteredContentTypes.length > 0 && <>
+            <span>_</span>
+            <span className="container-select" title="Content Type">
+              <span>{contentType === "" ? "contentType" : contentType}</span>
+              <select
+                id="content-type-dropdown"
+                value={contentType}
+                onChange={handleContentTypeChange}
+                ref={contentTypeRef}
+                className="select-dropdown2"
+              >
+                <option value="" disabled>
+                  Select Content Type
+                </option>
+                {filteredContentTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </span>
+          </>
+          }
           <span>_</span>
           {filteredContentCategories.length > 0 && (
             <>
@@ -204,6 +256,9 @@ const FileNameGenerator: React.FC = () => {
                   ref={contentCategoryRef}
                   className="select-dropdown2"
                 >
+                  <option value="" disabled>
+                    Select Content Category
+                  </option>
                   {filteredContentCategories.map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
@@ -265,10 +320,10 @@ const FileNameGenerator: React.FC = () => {
         {errorMessage && <span style={{ color: "red", height: 0 }}>{errorMessage}</span>}
         {successMessage && (
           <span style={{ color: "green", height: 0 }}>
-        ✅ {successMessage}
-      </span>
+            ✅ {successMessage}
+          </span>
         )}
-    </div >
+      </div >
     </>
   );
 };
