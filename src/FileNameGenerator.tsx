@@ -6,22 +6,22 @@ const getRandomElement = <T,>(array: T[]): T => {
   return array[Math.floor(Math.random() * array.length)];
 };
 
-const formatDate = (date: Date): string => {
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
   const year = date.getFullYear() - 2000;
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}${month}${day}`;
-  // return `${date.split('-')}`;
 };
 
 const FileNameGenerator: React.FC = () => {
   const [contentType, setContentType] = useState<string>("");
-  const [contentCategory, setContentCategory] = useState<string>("");
-  const [contentTitle, setContentTitle] = useState<string>("projectName");
-  const [language, setLanguage] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [mediaArt, setMediaArt] = useState<string>("KSBlay"); // New state for MediaArt
-  const [country, setCountry] = useState<string>(""); // New state for Country
+  const [contentCategory, setContentCategory] = useState<string>("ContentCategory");
+  const [contentTitle, setContentTitle] = useState<string>("ProjectName");
+  const [language, setLanguage] = useState<string>("Language");
+  const [date, setDate] = useState<string>("Date");
+  const [mediaArt, setMediaArt] = useState<string>("MediaArt");
+  const [country, setCountry] = useState<string>("Country");
 
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
@@ -32,17 +32,19 @@ const FileNameGenerator: React.FC = () => {
   useEffect(() => {
     const allContentTypes = Object.values(AVAILABLE_CONTENT_TYPES).flat(); // Flatten the content types
     setContentType(getRandomElement(allContentTypes).value); // Select a random content type
-
+    // setContentType("ContentType");
     const allContentCategories = Object.values(AVAILABLE_CONTENT_CATEGORIES).flat(); // Flatten the content categories
     setContentCategory(getRandomElement(allContentCategories).value); // Select a random content category
 
-    setLanguage(getRandomElement(AVAILABLE_LANGUAGES).value);
-    setDate(formatDate(new Date())); // Set current date in YYYYMMDD format
-    setMediaArt("defaultMediaArt"); // Default value for MediaArt
-    setCountry("defaultCountry"); // Default value for Country
+    setLanguage("Language");
+    // setDate(formatDate(new Date()));
+    setDate("Date");
+    setMediaArt("MediaArt");
+    setCountry("Country");
   }, []);
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(event.target.value.replace(/-/g, "")); // Format date as YYYYMMDD
+    // setDate(event.target.value.replace(/-/g, "")); // Format date as YYYYMMDD
+    setDate(formatDate(event.target.value)); // Format date as YYYYMMDD
   };
 
   const handleContentTitleChange = (
@@ -87,7 +89,11 @@ const FileNameGenerator: React.FC = () => {
   };
 
   const handleCopy = () => {
-    const textToCopy = `${date}_${mediaArt}_${contentTitle}_${contentType}_${contentCategory}_${language}_${country}`;
+    const languagePart = language !== "Language" ? `_${language}` : "";
+    const countryPart = country !== "Country" ? `_${country}` : "";
+    const contentTypePart = contentType !== "" ? `_${contentType}` : "";
+    const contentCategoryPart = contentCategory !== "" ? `_${contentCategory}` : "";
+    const textToCopy = `${date}_${mediaArt}_${contentTitle}${contentTypePart}${contentCategoryPart}${languagePart}${countryPart}`;
     navigator.clipboard.writeText(textToCopy);
   };
 
@@ -175,6 +181,9 @@ const FileNameGenerator: React.FC = () => {
               ref={languageRef}
               className="select-dropdown2"
             >
+              <option value="" disabled>
+                Select Language
+              </option>
               {AVAILABLE_LANGUAGES.map((lang) => (
                 <option key={lang.value} value={lang.value}>
                   {lang.label}
@@ -202,7 +211,7 @@ const FileNameGenerator: React.FC = () => {
         </div>
         <br />
         <button className="copy-button" onClick={handleCopy}>
-          📄 copy file name
+          📄 Copy File Name
         </button>
       </div>
     </>
@@ -271,6 +280,7 @@ const AVAILABLE_CONTENT_CATEGORIES: { [key: string]: { label: string; value: str
 };
 
 const AVAILABLE_LANGUAGES: { label: string; value: string }[] = [
+  { label: "None", value: "" },
   { label: "Afrikaans", value: "af" },
   { label: "Albanian", value: "sq" },
   { label: "Amharic", value: "am" },
@@ -364,6 +374,7 @@ const AVAILABLE_LANGUAGES: { label: string; value: string }[] = [
 ];
 
 const AVAILABLE_COUNTRIES: { label: string; value: string }[] = [
+  { label: "None", value: "" },
   { label: "Afghanistan", value: "af" },
   { label: "Albania", value: "al" },
   { label: "Algeria", value: "dz" },
