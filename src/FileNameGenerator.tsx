@@ -41,7 +41,6 @@ const FileNameGenerator: React.FC = () => {
     setMediaArt("defaultMediaArt"); // Default value for MediaArt
     setCountry("defaultCountry"); // Default value for Country
   }, []);
-
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDate(event.target.value.replace(/-/g, "")); // Format date as YYYYMMDD
   };
@@ -108,7 +107,7 @@ const FileNameGenerator: React.FC = () => {
               className="date-picker"
             />
           </span>
-          _
+          <span>_</span>
           <span className="container-select" title="Media Art">
             <span>{mediaArt}</span>
             <select
@@ -125,19 +124,9 @@ const FileNameGenerator: React.FC = () => {
               ))}
             </select>
           </span>
-          _
-          <span className="hidden">
-            {contentTitle}
-          </span>
-          <input
-            type="text"
-            className="input-title"
-            value={contentTitle}
-            autoFocus
-            onChange={handleContentTitleChange}
-            title="project title"
-          />
-          _
+          <span>_</span>
+          <span contentEditable="true" className="input-title" onChange={handleContentTitleChange}>{contentTitle}</span>
+          <span>_</span>
           <span className="container-select" title="Content Type">
             <span>{contentType}</span>
             <select
@@ -154,7 +143,7 @@ const FileNameGenerator: React.FC = () => {
               ))}
             </select>
           </span>
-          _
+          <span>_</span>
           {filteredContentCategories.length > 0 && (
             <>
               <span className="container-select" title="Content Category">
@@ -173,7 +162,7 @@ const FileNameGenerator: React.FC = () => {
                   ))}
                 </select>
               </span>
-              _
+              <span>_</span>
             </>
 
           )}

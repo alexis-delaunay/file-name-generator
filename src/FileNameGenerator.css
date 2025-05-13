@@ -6,18 +6,19 @@
   display: initial;
   cursor: pointer !important;
 }
+
 .copy-button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   border: none;
   background: none;
-cursor: pointer !important;
-margin: 0.5rem;
-font-family: Arial, Helvetica, sans-serif, bold;
-font-weight: bold;
-background-color: #00569d;
-color:white;
+  cursor: pointer !important;
+  margin: 0.5rem;
+  font-family: Arial, Helvetica, sans-serif, bold;
+  font-weight: bold;
+  background-color: #00569d;
+  color: white;
 }
 
 .copy-button:hover {
@@ -56,16 +57,17 @@ color:white;
   width: 100%;
 }
 
-.input-title, .input-title:focus-visible, .input-title:active {
+.input-title,
+.input-title:focus-visible,
+.input-title:active {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   border: none;
   background: none;
-  /* margin-right: -1.8rem; */
-  text-align: center;
   outline: none !important;
   font-size: medium;
+  min-width: 1px;
 }
 
 .select-dropdown::-ms-expand {
@@ -86,17 +88,22 @@ color:white;
   top: 0;
   height: 100%;
 }
-.container-select {
-input[type="date"]::-webkit-datetime-edit, input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-clear-button {
-  color: red;
-  position: relative;
-  width: 0 !important;
-}
 
-input::-webkit-calendar-picker-indicator {
-  width: 100% !important;
-  cursor: pointer;
-}}
+.container-select {
+
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-clear-button {
+    color: red;
+    position: relative;
+    width: 0 !important;
+  }
+
+  input::-webkit-calendar-picker-indicator {
+    width: 100% !important;
+    cursor: pointer;
+  }
+}
 
 .container {
   display: flex;
@@ -107,8 +114,14 @@ input::-webkit-calendar-picker-indicator {
   flex-direction: column;
 }
 
-.container-select:hover, .input-title:hover, .container-select:hover, .select-dropdown2:hover,
-.container-select:focus-visible, .input-title:focus-visible, .container-select:focus-visible, .select-dropdown2:focus-visible {
+.container-select:hover,
+.input-title:hover,
+.container-select:hover,
+.select-dropdown2:hover,
+.container-select:focus-visible,
+.input-title:focus-visible,
+.container-select:focus-visible,
+.select-dropdown2:focus-visible {
   /* outline: 1px gray solid !important; */
   background-color: #00569d5d;
   background-color: #4d89ba;
@@ -117,7 +130,7 @@ input::-webkit-calendar-picker-indicator {
 }
 
 .title {
-padding-bottom: 3rem;
+  padding-bottom: 3rem;
 }
 
 /* * {
