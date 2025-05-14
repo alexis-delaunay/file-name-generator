@@ -235,7 +235,7 @@ const FileNameGenerator: React.FC = () => {
             <span
               ref={contentTitleRef}
               contentEditable="true"
-              className="input-title"
+              className="input-title2"
               onInput={handleContentTitleChange}
               onFocus={() => setIsFocused(true)} // Show suggestions on focus
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide suggestions on blur with delay
