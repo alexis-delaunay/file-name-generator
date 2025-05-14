@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./FileNameGenerator.css";
 
-
 const getRandomElement = <T,>(array: T[]): T => {
   return array[Math.floor(Math.random() * array.length)];
 };
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
+  const date = new Date(dateString);
   const year = date.getFullYear() - 2000;
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -17,7 +16,8 @@ const formatDate = (dateString: string): string => {
 const FileNameGenerator: React.FC = () => {
   const [contentType, setContentType] = useState<string>("");
   const [contentCategory, setContentCategory] = useState<string>("");
-  const [contentTitle, setContentTitle] = useState<string>("");
+  // const [contentTitle, setContentTitle] = useState<string>("");
+
   const [language, setLanguage] = useState<string>("Language");
   const [date, setDate] = useState<string>("Date");
   const [mediaArt, setMediaArt] = useState<string>("");
@@ -27,18 +27,27 @@ const FileNameGenerator: React.FC = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState<boolean>(false); // Track focus state
 
+  const contentTitleRef = useRef<HTMLSpanElement>(null);
   const contentTypeRef = useRef<HTMLSelectElement>(null);
   const contentCategoryRef = useRef<HTMLSelectElement>(null);
   const languageRef = useRef<HTMLSelectElement>(null);
   const mediaArtRef = useRef<HTMLSelectElement>(null);
   const countryRef = useRef<HTMLSelectElement>(null);
 
-  useEffect(() => {return
+  const contentTitle = useMemo(() => {
+    const title = contentTitleRef.current?.textContent ?? "";
+    return title;
+  }, [contentTitleRef.current?.textContent]);
+
+  useEffect(() => {
+    return;
     const allContentTypes = Object.values(AVAILABLE_CONTENT_TYPES).flat(); // Flatten the content types
 
     // setContentType(getRandomElement(allContentTypes).value); // Select a random content type
     // setContentType("ContentType");
-    const allContentCategories = Object.values(AVAILABLE_CONTENT_CATEGORIES).flat(); // Flatten the content categories
+    const allContentCategories = Object.values(
+      AVAILABLE_CONTENT_CATEGORIES
+    ).flat(); // Flatten the content categories
     setContentCategory(getRandomElement(allContentCategories).value); // Select a random content category
 
     setLanguage("Language");
@@ -54,17 +63,23 @@ const FileNameGenerator: React.FC = () => {
 
   useEffect(() => {
     // Load stored content titles from localStorage on component mount
-    const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+    const storedTitles = JSON.parse(
+      localStorage.getItem("contentTitles") || "[]"
+    );
     setSuggestions(storedTitles);
   }, []);
 
-  const handleContentTitleChange = (event: React.FormEvent<HTMLSpanElement>) => {
+  const handleContentTitleChange = (
+    event: React.FormEvent<HTMLSpanElement>
+  ) => {
     const newTitle = event.currentTarget.textContent || "";
-    setContentTitle(newTitle);
+    // setContentTitle(newTitle);
 
     // Show suggestions only if the user has entered something
     if (newTitle.trim() !== "") {
-      const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+      const storedTitles = JSON.parse(
+        localStorage.getItem("contentTitles") || "[]"
+      );
       const filteredSuggestions = storedTitles.filter((title: string) =>
         title.toLowerCase().includes(newTitle.toLowerCase())
       );
@@ -75,7 +90,7 @@ const FileNameGenerator: React.FC = () => {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setContentTitle(suggestion);
+    contentTitleRef.current!.textContent = suggestion;
     setSuggestions([]); // Clear suggestions after selection
     setIsFocused(false); // Hide suggestions
   };
@@ -105,17 +120,17 @@ const FileNameGenerator: React.FC = () => {
     setMediaArt(selectedMediaArt);
 
     // Automatically select the first option in the filtered content types
-    const firstContentType = AVAILABLE_CONTENT_TYPES[selectedMediaArt]?.[0]?.value || "";
+    const firstContentType =
+      AVAILABLE_CONTENT_TYPES[selectedMediaArt]?.[0]?.value || "";
     setContentType(firstContentType);
 
     // Automatically select the first option in the filtered content categories
-    const firstContentCategory = AVAILABLE_CONTENT_CATEGORIES[selectedMediaArt]?.[0]?.value || "";
+    const firstContentCategory =
+      AVAILABLE_CONTENT_CATEGORIES[selectedMediaArt]?.[0]?.value || "";
     setContentCategory(firstContentCategory);
   };
 
-  const handleCountryChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleCountryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setCountry(event.target.value);
   };
 
@@ -148,26 +163,38 @@ const FileNameGenerator: React.FC = () => {
     const languagePart = language !== "Language" ? `_${language}` : "";
     const countryPart = country !== "Country" ? `_${country}` : "";
     const contentTypePart = contentType !== "" ? `_${contentType}` : "";
-    const contentCategoryPart = contentCategory !== "" ? `_${contentCategory}` : "";
+    const contentCategoryPart =
+      contentCategory !== "" ? `_${contentCategory}` : "";
     const textToCopy = `${date}_${mediaArt}_${contentTitle}${contentTypePart}${contentCategoryPart}${languagePart}${countryPart}`;
 
     // Update localStorage with the new contentTitle
-    const storedTitles = JSON.parse(localStorage.getItem("contentTitles") || "[]");
+    const storedTitles = JSON.parse(
+      localStorage.getItem("contentTitles") || "[]"
+    );
     if (!storedTitles.includes(contentTitle)) {
       const updatedTitles = [...storedTitles, contentTitle];
       localStorage.setItem("contentTitles", JSON.stringify(updatedTitles));
     }
 
     // Copy the file name to the clipboard
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setSuccessMessage("File name copied successfully!"); // Set success message
-    }).catch(() => {
-      setErrorMessage("Failed to copy the file name."); // Handle copy failure
-    });
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setSuccessMessage("File name copied successfully!"); // Set success message
+      })
+      .catch(() => {
+        setErrorMessage("Failed to copy the file name."); // Handle copy failure
+      });
   };
 
-  const filteredContentTypes = useMemo(() => AVAILABLE_CONTENT_TYPES[mediaArt] || [], [mediaArt]);
-  const filteredContentCategories = useMemo(() => AVAILABLE_CONTENT_CATEGORIES[mediaArt] || [], [mediaArt]);
+  const filteredContentTypes = useMemo(
+    () => AVAILABLE_CONTENT_TYPES[mediaArt] || [],
+    [mediaArt]
+  );
+  const filteredContentCategories = useMemo(
+    () => AVAILABLE_CONTENT_CATEGORIES[mediaArt] || [],
+    [mediaArt]
+  );
 
   return (
     <>
@@ -206,6 +233,7 @@ const FileNameGenerator: React.FC = () => {
           <span>_</span>
           <span style={{ position: "relative" }}>
             <span
+              ref={contentTitleRef}
               contentEditable="true"
               className="input-title"
               onInput={handleContentTitleChange}
@@ -213,41 +241,45 @@ const FileNameGenerator: React.FC = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide suggestions on blur with delay
               suppressContentEditableWarning={true}
             >
-              {contentTitle === "" ? "ProjectName" : contentTitle}
+              ProjectName
             </span>
             {isFocused && suggestions.length > 0 && (
               <ul className="autocomplete-suggestions">
                 {suggestions.map((suggestion, index) => (
-                  <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                  <li
+                    key={index}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
                     {suggestion}
                   </li>
                 ))}
               </ul>
             )}
           </span>
-          {filteredContentTypes.length > 0 && <>
-            <span>_</span>
-            <span className="container-select" title="Content Type">
-              <span>{contentType === "" ? "contentType" : contentType}</span>
-              <select
-                id="content-type-dropdown"
-                value={contentType}
-                onChange={handleContentTypeChange}
-                ref={contentTypeRef}
-                className="select-dropdown2"
-              >
-                <option value="" disabled>
-                  Select Content Type
-                </option>
-                {filteredContentTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
+          {filteredContentTypes.length > 0 && (
+            <>
+              <span>_</span>
+              <span className="container-select" title="Content Type">
+                <span>{contentType === "" ? "contentType" : contentType}</span>
+                <select
+                  id="content-type-dropdown"
+                  value={contentType}
+                  onChange={handleContentTypeChange}
+                  ref={contentTypeRef}
+                  className="select-dropdown2"
+                >
+                  <option value="" disabled>
+                    Select Content Type
                   </option>
-                ))}
-              </select>
-            </span>
-          </>
-          }
+                  {filteredContentTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </>
+          )}
           <span>_</span>
           {filteredContentCategories.length > 0 && (
             <>
@@ -272,10 +304,11 @@ const FileNameGenerator: React.FC = () => {
               </span>
               <span>_</span>
             </>
-
           )}
           <span
-            className={`container-select ${language === "Language" ? "unset" : ""}`}
+            className={`container-select ${
+              language === "Language" ? "unset" : ""
+            }`}
             title="Language"
           >
             <span>{language}</span>
@@ -297,7 +330,12 @@ const FileNameGenerator: React.FC = () => {
             </select>
           </span>
           _
-          <span className={`container-select ${country === "Country" ? "unset" : ""}`} title="Country">
+          <span
+            className={`container-select ${
+              country === "Country" ? "unset" : ""
+            }`}
+            title="Country"
+          >
             <span>{country}</span>
             <select
               id="country-dropdown"
@@ -321,20 +359,22 @@ const FileNameGenerator: React.FC = () => {
         <button className="copy-button" onClick={handleCopy}>
           📄 Copy File Name
         </button>
-        {errorMessage && <span style={{ color: "red", height: 0 }}>{errorMessage}</span>}
-        {successMessage && (
-          <span style={{ color: "green", height: 0 }}>
-            ✅ {successMessage}
-          </span>
+        {errorMessage && (
+          <span style={{ color: "red", height: 0 }}>{errorMessage}</span>
         )}
-      </div >
+        {successMessage && (
+          <span style={{ color: "green", height: 0 }}>✅ {successMessage}</span>
+        )}
+      </div>
     </>
   );
 };
 
 export default FileNameGenerator;
 
-const AVAILABLE_CONTENT_TYPES: { [key: string]: { label: string; value: string }[] } = {
+const AVAILABLE_CONTENT_TYPES: {
+  [key: string]: { label: string; value: string }[];
+} = {
   KSBlay: [
     { label: "Brochure", value: "BRO" },
     { label: "Flyer", value: "FLY" },
@@ -377,7 +417,9 @@ const AVAILABLE_CONTENT_TYPES: { [key: string]: { label: string; value: string }
   KSBimg: [], // No options for KSBimg
 };
 
-const AVAILABLE_CONTENT_CATEGORIES: { [key: string]: { label: string; value: string }[] } = {
+const AVAILABLE_CONTENT_CATEGORIES: {
+  [key: string]: { label: string; value: string }[];
+} = {
   KSBlay: [
     { label: "General Content", value: "gen" },
     { label: "Fairs and Events", value: "event" },
