@@ -147,7 +147,7 @@ const FileNameGenerator: React.FC = () => {
       return;
     }
     if (contentTitle.trim() === "") {
-      setErrorMessage("Please enter the Project Name.");
+      setErrorMessage("Please enter the Content Title.");
       setSuccessMessage(""); // Clear success message
       return;
     }
@@ -241,7 +241,7 @@ const FileNameGenerator: React.FC = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide suggestions on blur with delay
               suppressContentEditableWarning={true}
             >
-              ProjectName
+              ContentTitle
             </span>
             {isFocused && suggestions.length > 0 && (
               <ul className="autocomplete-suggestions">
